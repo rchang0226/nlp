@@ -1,30 +1,41 @@
+import string
+import nltk
 from gensim.models import Word2Vec
 from sklearn.decomposition import PCA
 from matplotlib import pyplot
 import numpy as np
+from nltk.stem import PorterStemmer
+from nltk.corpus import stopwords
 
-# read tokenized words from file
-words = []
-with open('C:/Users/raymo/OneDrive/Documents/nlp/tokenized.txt', 'r', encoding='utf-8') as fp:
-    for line in fp:
-        # remove linebreak from each word (last character)
-        x = line[:-1]
-        words.append(x)
+# load data
+filename = 'marcus_aurelius.txt'
+file = open(filename, 'rt', encoding='utf-8')
+text = file.read()
+file.close()
+
+# set up data processing
+table = str.maketrans(","*len(string.punctuation), string.punctuation)
+stemmer = PorterStemmer()
+stop_words = set(stopwords.words('english'))
 
 # split into sentence arrays
 sentences = []
-sentence = []
-for word in words:
-    if word == '.':
-        sentences.append(sentence)
-        sentence = []
-    elif word.isalnum():
-        sentence.append(word)
-
-print(sentences)
+for sentence in nltk.sent_tokenize(text):
+    words = nltk.word_tokenize(sentence)
+    words = [w.lower() for w in words]
+    words = [w.translate(table) for w in words]
+    words = [word for word in words if word.isalnum()]
+    words = [stemmer.stem(word) for word in words if word not in stop_words]
+    if words:
+        sentences.append(words)
 
 # train model
-model = Word2Vec(sentences, min_count=1)
+model = Word2Vec(sentences, min_count=20, sg=1, vector_size=1000)
+
+# print top 10 words similar to 'greek'
+sims = model.wv.most_similar('greek', topn=10)
+print(sims)
+
 # fit a 2d pca model to the vectors
 X = np.asarray(model.wv.vectors)
 pca = PCA(n_components=2)
