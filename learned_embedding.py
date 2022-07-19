@@ -56,7 +56,8 @@ encoded = t.texts_to_sequences(cleaned)
 print(encoded)
 
 # pad all to same length
-max_length = 16
+max_length = max(len(s) for s in cleaned)
+print(max_length)
 padded = pad_sequences(encoded, maxlen=max_length, padding='post')
 print(padded)
 
