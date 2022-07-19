@@ -127,3 +127,7 @@ model.fit(Xtrain, ytrain, epochs=10, verbose=2)
 # evaluate the model
 loss, acc = model.evaluate(Xtest, ytest, verbose=0)
 print('Test Accuracy: %f' % (acc*100))
+
+# save the model
+model.save("model.h5")
+print("Saved model")
